@@ -1,12 +1,19 @@
 const UPPERCASE = /[\p{Lu}]/u;
 const LOWERCASE = /[\p{Ll}]/u;
 const LEADING_CAPITAL = /^[\p{Lu}](?![\p{Lu}])/gu;
+const LEADING_PLURAL_ACRONYM = /^[\p{Lu}](?=\p{Lu}+s(?:$|[_.\- ]|\p{Lu}))/u;
 const IDENTIFIER = /([\p{Alpha}\p{N}_]|$)/u;
 const SEPARATORS = /[_.\- ]+/;
 
 const LEADING_SEPARATORS = new RegExp('^' + SEPARATORS.source);
 const SEPARATORS_AND_IDENTIFIER = new RegExp(SEPARATORS.source + IDENTIFIER.source, 'gu');
 const NUMBERS_AND_IDENTIFIER = new RegExp('\\d+' + IDENTIFIER.source, 'gu');
+
+// A lone `s` after an acronym (`IDs`, `APIs`) is a plural and stays attached to it
+const isPluralSuffix = (string, index) => {
+	const next = string[index + 1];
+	return string[index] === 's' && (next === undefined || SEPARATORS.test(next) || UPPERCASE.test(next));
+};
 
 const preserveCamelCase = (string, toLowerCase, toUpperCase) => {
 	let isLastCharLower = false;
@@ -22,7 +29,7 @@ const preserveCamelCase = (string, toLowerCase, toUpperCase) => {
 			isLastLastCharUpper = isLastCharUpper;
 			isLastCharUpper = true;
 			index++;
-		} else if (isLastCharUpper && isLastLastCharUpper && LOWERCASE.test(character)) {
+		} else if (isLastCharUpper && isLastLastCharUpper && LOWERCASE.test(character) && !isPluralSuffix(string, index)) {
 			string = string.slice(0, index - 1) + '-' + string.slice(index - 1);
 			isLastLastCharUpper = isLastCharUpper;
 			isLastCharUpper = false;
@@ -40,7 +47,8 @@ const preserveCamelCase = (string, toLowerCase, toUpperCase) => {
 const preserveConsecutiveUppercase = (input, toLowerCase) => {
 	LEADING_CAPITAL.lastIndex = 0;
 
-	return input.replace(LEADING_CAPITAL, m1 => toLowerCase(m1));
+	return input.replace(LEADING_PLURAL_ACRONYM, m1 => toLowerCase(m1))
+		.replace(LEADING_CAPITAL, m1 => toLowerCase(m1));
 };
 
 const postProcess = (input, toUpperCase) => {
