@@ -8,7 +8,9 @@ const LEADING_SEPARATORS = new RegExp('^' + SEPARATORS.source);
 const SEPARATORS_AND_IDENTIFIER = new RegExp(SEPARATORS.source + IDENTIFIER.source, 'gu');
 const NUMBERS_AND_IDENTIFIER = new RegExp('\\d+' + IDENTIFIER.source, 'gu');
 
-const preserveCamelCase = (string, toLowerCase, toUpperCase) => {
+const isAcronymPluralSuffix = (string, index) => string[index] === 's' && (index + 1 === string.length || !LOWERCASE.test(string[index + 1]));
+
+const preserveCamelCase = (string, toLowerCase, toUpperCase, preserveConsecutiveUppercase) => {
 	let isLastCharLower = false;
 	let isLastCharUpper = false;
 	let isLastLastCharUpper = false;
@@ -22,7 +24,7 @@ const preserveCamelCase = (string, toLowerCase, toUpperCase) => {
 			isLastLastCharUpper = isLastCharUpper;
 			isLastCharUpper = true;
 			index++;
-		} else if (isLastCharUpper && isLastLastCharUpper && LOWERCASE.test(character)) {
+		} else if (isLastCharUpper && isLastLastCharUpper && LOWERCASE.test(character) && (preserveConsecutiveUppercase || !isAcronymPluralSuffix(string, index))) {
 			string = string.slice(0, index - 1) + '-' + string.slice(index - 1);
 			isLastLastCharUpper = isLastCharUpper;
 			isLastCharUpper = false;
@@ -93,7 +95,7 @@ export default function camelCase(input, options) {
 	const hasUpperCase = input !== toLowerCase(input);
 
 	if (hasUpperCase) {
-		input = preserveCamelCase(input, toLowerCase, toUpperCase);
+		input = preserveCamelCase(input, toLowerCase, toUpperCase, options.preserveConsecutiveUppercase);
 	}
 
 	input = input.replace(LEADING_SEPARATORS, '');
