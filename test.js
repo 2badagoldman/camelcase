@@ -3,9 +3,15 @@ import camelCase from './index.js';
 
 test('camelCase', t => {
 	t.is(camelCase('foo'), 'foo');
-	/// https://github.com/sindresorhus/camelcase/issues/95
-	/// t.is(camelCase('IDs'), 'ids');
-	/// t.is(camelCase('FooIDs'), 'fooIds');
+	// https://github.com/sindresorhus/camelcase/issues/95
+	t.is(camelCase('IDs'), 'ids');
+	t.is(camelCase('FooIDs'), 'fooIds');
+	t.is(camelCase('FooIDs-bar'), 'fooIdsBar');
+	t.is(camelCase('FooIDsBar'), 'fooIdsBar');
+	t.is(camelCase('FOOs'), 'foos');
+	t.is(camelCase('IDsX'), 'idsX');
+	t.is(camelCase('IDs', {pascalCase: true}), 'Ids');
+	t.is(camelCase('FooIDs', {pascalCase: true}), 'FooIds');
 	t.is(camelCase('foo-bar'), 'fooBar');
 	t.is(camelCase('foo-bar-baz'), 'fooBarBaz');
 	t.is(camelCase('foo--bar'), 'fooBar');
@@ -170,8 +176,8 @@ test('camelCase with preserveConsecutiveUppercase option', t => {
 	t.is(camelCase('РозовыйПушистыйFOOдинорогиf', {preserveConsecutiveUppercase: true}), 'розовыйПушистыйFOOдинорогиf');
 	t.is(camelCase('桑德在这里。', {preserveConsecutiveUppercase: true}), '桑德在这里。');
 	t.is(camelCase('桑德_在这里。', {preserveConsecutiveUppercase: true}), '桑德在这里。');
-	/// https://github.com/sindresorhus/camelcase/issues/95
-	/// t.is(camelCase('IDs', {preserveConsecutiveUppercase: true}), 'ids');
+	// https://github.com/sindresorhus/camelcase/issues/95
+	t.is(camelCase('IDs', {preserveConsecutiveUppercase: true}), 'iDs');
 	t.is(camelCase('FooIDs', {preserveConsecutiveUppercase: true}), 'fooIDs');
 });
 
